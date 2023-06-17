@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, OnInit, TrackByFunction, ViewChild } from "@angular/core";
 import { DataService } from "src/app/services/data/data.service";
 import { IMenuLink } from "../menu/menu.component";
-import { ITableAction, TableCellActions, TableColumn, TableRow } from "../table/table.component";
+import { ITableAction, TableCellAction, TableColumn, TableRow } from "../table/table.component";
 import { BehaviorSubject, combineLatest, startWith, Subject, switchMap, takeUntil } from "rxjs";
 import { MatPaginator } from "@angular/material/paginator";
 import { ActivatedRoute } from "@angular/router";
@@ -149,12 +149,18 @@ export class EmojisComponent implements OnInit, AfterViewInit {
     }, 0);
   }
 
-  getActionListByStatus(status: EmojiStatusEnum): Array<TableCellActions> {
+  /**
+   * Получить список действий исходя из статуса эмоджи
+   * @param status - статус эмоджи
+   */
+  getActionListByStatus(status: EmojiStatusEnum): Array<TableCellAction> {
     switch (status) {
       case EmojiStatusEnum.FAVORITE:
         return [
           {
-            label: "Удалить",
+            tooltip: "Удалить из избранного",
+            iconName: "favorite",
+            color: "accent",
             action: EmojiStatusEnum.GENERAL,
           },
         ];
@@ -162,19 +168,24 @@ export class EmojisComponent implements OnInit, AfterViewInit {
       case EmojiStatusEnum.REMOVED:
         return [
           {
-            label: "Восстановить",
+            tooltip: "Восстановить",
+            iconName: "settings_backup_restore",
             action: EmojiStatusEnum.GENERAL,
+            color: "primary",
           },
         ];
 
       default:
         return [
           {
-            label: "В избранное",
+            tooltip: "В избранное",
+            iconName: "favorite_border",
             action: EmojiStatusEnum.FAVORITE,
+            color: "accent",
           },
           {
-            label: "Удалить",
+            tooltip: "Удалить",
+            iconName: "clear",
             action: EmojiStatusEnum.REMOVED,
           },
         ];

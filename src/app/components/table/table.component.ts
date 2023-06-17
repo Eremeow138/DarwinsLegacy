@@ -15,16 +15,19 @@ export type TableColumn = {
 
 export type TableCellValue = string | null;
 
-export type TableCellActions = {
+export type TableCellAction = {
   action: string;
-  label: string;
+  tooltip: string;
+  // Названия материал иконок https://www.angularjswiki.com/angular/angular-material-icons-list-mat-icon-list/
+  iconName: string;
+  color?: "basic" | "primary" | "accent" | "warn" | "disabled" | "link";
 };
 
 export type TableRowCell = {
   // текущее значение ячейки
   value?: TableCellValue;
   // Список действий для ячейки с типом "actions".
-  actionsList?: Array<TableCellActions>;
+  actionsList?: Array<TableCellAction>;
 };
 
 export type TableRow = {
@@ -76,7 +79,7 @@ export class TableComponent implements OnInit {
     return columnValue ? columnValue : "";
   }
 
-  getCellActions(row: TableRow, column: TableColumn): Array<TableCellActions> {
+  getCellActions(row: TableRow, column: TableColumn): Array<TableCellAction> {
     const actions = row[column.name].actionsList;
     return actions ? actions : [];
   }

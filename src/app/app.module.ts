@@ -12,6 +12,9 @@ import { MenuComponent } from "./components/menu/menu.component";
 import { MatListModule } from "@angular/material/list";
 import { EmojisComponent } from "./components/emojis/emojis.component";
 import { MatPaginatorModule } from "@angular/material/paginator";
+import { MatButtonModule } from "@angular/material/button";
+import { MatIconModule } from "@angular/material/icon";
+import { MatTooltipModule } from "@angular/material/tooltip";
 
 @NgModule({
   declarations: [AppComponent, TableComponent, MenuComponent, EmojisComponent],
@@ -22,6 +25,9 @@ import { MatPaginatorModule } from "@angular/material/paginator";
     MatTableModule,
     MatListModule,
     MatPaginatorModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTooltipModule,
     BrowserAnimationsModule,
   ],
   providers: [],

@@ -10,10 +10,17 @@
         ><img class="preview" [src]="getTextCellValue(row, column)" alt="error"
       /></ng-container>
       <ng-container *ngIf="column.type === 'actions'"
-        ><button *ngFor="let action of getCellActions(row, column)" (click)="emitAction(column, row, action.action)">
-          {{ action.label }}
-        </button></ng-container
-      >
+        ><button
+          mat-icon-button
+          [matTooltip]="action.tooltip"
+          matTooltipShowDelay="1000"
+          [color]="action.color ?? 'basic'"
+          *ngFor="let action of getCellActions(row, column)"
+          (click)="emitAction(column, row, action.action)"
+        >
+          <mat-icon>{{ action.iconName }}</mat-icon>
+        </button>
+      </ng-container>
     </td>
   </ng-container>
 
