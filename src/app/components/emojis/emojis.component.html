@@ -11,11 +11,6 @@
         (actionEvent)="resolveAction($event)"
       ></app-table>
     </div>
-    <mat-paginator
-      [pageSizeOptions]="[10, 20, 30, 40]"
-      [length]="countOfEmojis"
-      [pageSize]="pageSize"
-      aria-label="Select page of GitHub search results"
-    ></mat-paginator>
+    <mat-paginator [pageSizeOptions]="[10, 20, 30, 40]" [length]="countOfEmojis" [pageSize]="pageSize"></mat-paginator>
   </div>
 </div>

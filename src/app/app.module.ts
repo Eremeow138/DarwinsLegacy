@@ -11,10 +11,11 @@ import { TableComponent } from "./components/table/table.component";
 import { MenuComponent } from "./components/menu/menu.component";
 import { MatListModule } from "@angular/material/list";
 import { EmojisComponent } from "./components/emojis/emojis.component";
-import { MatPaginatorModule } from "@angular/material/paginator";
+import { MatPaginatorIntl, MatPaginatorModule } from "@angular/material/paginator";
 import { MatButtonModule } from "@angular/material/button";
 import { MatIconModule } from "@angular/material/icon";
 import { MatTooltipModule } from "@angular/material/tooltip";
+import { getRussianPaginatorIntl } from "./utils/material-utils";
 
 @NgModule({
   declarations: [AppComponent, TableComponent, MenuComponent, EmojisComponent],
@@ -30,7 +31,7 @@ import { MatTooltipModule } from "@angular/material/tooltip";
     MatTooltipModule,
     BrowserAnimationsModule,
   ],
-  providers: [],
+  providers: [{ provide: MatPaginatorIntl, useValue: getRussianPaginatorIntl() }],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
