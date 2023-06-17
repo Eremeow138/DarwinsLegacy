@@ -1,0 +1,22 @@
+<table mat-table [dataSource]="rows" [trackBy]="trackByFn" class="table">
+  <ng-container *ngFor="let column of columns; let i = index" [matColumnDef]="column.name">
+    <th mat-header-cell *matHeaderCellDef>{{ column.label }}</th>
+    <td mat-cell *matCellDef="let row">
+      <ng-container *ngIf="column.type === 'text'">{{ getTextCellValue(row, column) }}</ng-container>
+      <ng-container *ngIf="column.type === 'link'"
+        ><a [href]="getTextCellValue(row, column)">{{ getTextCellValue(row, column) }}</a></ng-container
+      >
+      <ng-container *ngIf="column.type === 'image'"
+        ><img class="preview" [src]="getTextCellValue(row, column)" alt="error"
+      /></ng-container>
+      <ng-container *ngIf="column.type === 'actions'"
+        ><button *ngFor="let action of getCellActions(row, column)" (click)="emitAction(column, row, action.action)">
+          {{ action.label }}
+        </button></ng-container
+      >
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="columnsNames; sticky: isStickyHeader"></tr>
+  <tr mat-row *matRowDef="let row; columns: columnsNames"></tr>
+</table>

@@ -1,0 +1,10 @@
+.menu {
+  .menu-item {
+    &.selected {
+      background: rgba(63, 81, 181, 0.15);
+      .mdc-list-item__primary-text {
+        color: #3f51b5;
+      }
+    }
+  }
+}

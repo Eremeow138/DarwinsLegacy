@@ -1,0 +1,21 @@
+<div class="emojis">
+  <div class="menu-wrapper">
+    <app-menu [menuLinks]="links"></app-menu>
+  </div>
+  <div class="table-wrapper">
+    <div class="table">
+      <app-table
+        [columns]="emojiColumns"
+        [rows]="emojiRows"
+        [trackByFn]="emojisTrackBy"
+        (actionEvent)="resolveAction($event)"
+      ></app-table>
+    </div>
+    <mat-paginator
+      [pageSizeOptions]="[10, 20, 30, 40]"
+      [length]="countOfEmojis"
+      [pageSize]="pageSize"
+      aria-label="Select page of GitHub search results"
+    ></mat-paginator>
+  </div>
+</div>
