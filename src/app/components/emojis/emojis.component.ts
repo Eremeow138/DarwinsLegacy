@@ -25,6 +25,8 @@ type EmojiPages = Record<EmojiStatusEnum, IEmojiPageState>;
 export class EmojisComponent implements OnInit, AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
+  // Для навигации по страницам в качестве адресов (а точнее параметров) используется EmojiStatusEnum
+  // Так как в зависимоти от адреса, мы будем получать эмоджи с определенными статусами,
   readonly links: Array<IMenuLink> = [
     { label: "Все", link: `/${EmojiStatusEnum.GENERAL}` },
     { label: "Избранное", link: `/${EmojiStatusEnum.FAVORITE}` },
@@ -77,6 +79,8 @@ export class EmojisComponent implements OnInit, AfterViewInit {
 
   countOfEmojis = 0;
 
+  currentPageStatus = EmojiStatusEnum.GENERAL;
+
   emojisTrackBy: TrackByFunction<TableRow> = (index: number, row: TableRow) => row["name"].value;
 
   private reload$ = new BehaviorSubject<null>(null);
@@ -102,9 +106,9 @@ export class EmojisComponent implements OnInit, AfterViewInit {
         // так как мы подпишемся заново
         this.destroyPaginatorAndReloadSubscribe$.next();
 
-        const currentEmojiStatus = params["status"] as EmojiStatusEnum;
-        this.paginator.pageIndex = this.pages[currentEmojiStatus].pageIndex;
-        this.paginator.pageSize = this.pages[currentEmojiStatus].pageSize;
+        this.currentPageStatus = params["status"] as EmojiStatusEnum;
+        this.paginator.pageIndex = this.pages[this.currentPageStatus].pageIndex;
+        this.paginator.pageSize = this.pages[this.currentPageStatus].pageSize;
 
         combineLatest([
           this.paginator.page.asObservable().pipe(
@@ -118,14 +122,14 @@ export class EmojisComponent implements OnInit, AfterViewInit {
           .pipe(
             takeUntil(this.destroyPaginatorAndReloadSubscribe$),
             switchMap(([pageData]) => {
-              this.pages[currentEmojiStatus].pageIndex = pageData.pageIndex;
-              this.pages[currentEmojiStatus].pageSize = pageData.pageSize;
+              this.pages[this.currentPageStatus].pageIndex = pageData.pageIndex;
+              this.pages[this.currentPageStatus].pageSize = pageData.pageSize;
 
               this.pageSize = pageData.pageSize;
 
               localStorage.setItem(LocalStorageKeyEnum.EMOJIS_PAGE_STATE, JSON.stringify(this.pages));
 
-              return this.dataService.getEmojis(pageData.pageSize, pageData.pageIndex + 1, currentEmojiStatus);
+              return this.dataService.getEmojis(pageData.pageSize, pageData.pageIndex + 1, this.currentPageStatus);
             })
           )
           .subscribe({
@@ -135,7 +139,7 @@ export class EmojisComponent implements OnInit, AfterViewInit {
                   name: { value: emoji.name },
                   link: { value: emoji.imageUrl },
                   preview: { value: emoji.imageUrl },
-                  actionsList: { actionsList: this.getActionListByStatus(emoji.status) },
+                  actionsList: { actionsList: this.getActionListByEmojiStatusAndPageParam(emoji.status) },
                 };
               });
               this.countOfEmojis = emojis.count;
@@ -150,20 +154,39 @@ export class EmojisComponent implements OnInit, AfterViewInit {
   }
 
   /**
-   * Получить список действий исходя из статуса эмоджи
+   * Получить список действий исходя из статуса эмоджи и
    * @param status - статус эмоджи
    */
-  getActionListByStatus(status: EmojiStatusEnum): Array<TableCellAction> {
-    switch (status) {
+  private getActionListByEmojiStatusAndPageParam(emojiStatus: EmojiStatusEnum): Array<TableCellAction> {
+    const removeFromFavoriteAction: TableCellAction = {
+      tooltip: "Удалить из избранного",
+      iconName: "favorite",
+      color: "accent",
+      action: EmojiStatusEnum.GENERAL,
+    };
+
+    switch (emojiStatus) {
       case EmojiStatusEnum.FAVORITE:
-        return [
-          {
-            tooltip: "Удалить из избранного",
-            iconName: "favorite",
-            color: "accent",
-            action: EmojiStatusEnum.GENERAL,
-          },
-        ];
+        // В случае с избранным эмоджи, необходимо также проверить на какой странице мы находимся,
+        // так как страница "Все" может содержать избранные эмоджи
+        switch (this.currentPageStatus) {
+          // Для страницы "Избранное", возвращаем только действие "Удалить из избранного".
+          case EmojiStatusEnum.FAVORITE:
+            return [removeFromFavoriteAction];
+          // Для страницы "Все", возвращаем действия "Удалить из избранного" и "Удалить"
+          case EmojiStatusEnum.GENERAL:
+            return [
+              removeFromFavoriteAction,
+              {
+                tooltip: "Удалить",
+                iconName: "clear",
+                action: EmojiStatusEnum.REMOVED,
+              },
+            ];
+
+          default:
+            return [];
+        }
 
       case EmojiStatusEnum.REMOVED:
         return [
@@ -175,7 +198,7 @@ export class EmojisComponent implements OnInit, AfterViewInit {
           },
         ];
 
-      default:
+      case EmojiStatusEnum.GENERAL:
         return [
           {
             tooltip: "В избранное",
@@ -189,6 +212,8 @@ export class EmojisComponent implements OnInit, AfterViewInit {
             action: EmojiStatusEnum.REMOVED,
           },
         ];
+      default:
+        return [];
     }
   }
 
