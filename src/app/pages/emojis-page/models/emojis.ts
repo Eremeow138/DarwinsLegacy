@@ -1,3 +1,5 @@
+export const EMOJI_STATUS_PARAM = "status";
+
 export interface IEmoji {
   name: string;
   imageUrl: string;

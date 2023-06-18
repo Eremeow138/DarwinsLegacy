@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { IEmoji, EmojiStatusEnum, LocalStorageKeyEnum } from "src/app/models/data";
+import { IEmoji, EmojiStatusEnum, LocalStorageKeyEnum } from "src/app/pages/emojis-page/models/emojis";
 import { map, Observable, of, tap } from "rxjs";
 
 export interface IPageData<T> {

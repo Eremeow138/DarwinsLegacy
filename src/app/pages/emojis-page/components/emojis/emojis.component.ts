@@ -1,11 +1,16 @@
 import { AfterViewInit, Component, OnInit, TrackByFunction, ViewChild } from "@angular/core";
 import { DataService } from "src/app/services/data/data.service";
-import { IMenuLink } from "../menu/menu.component";
-import { ITableAction, TableCellAction, TableColumn, TableRow } from "../table/table.component";
+import { IMenuLink } from "../../../../common/ui/menu/components/menu/menu.component";
+import {
+  ITableAction,
+  TableCellAction,
+  TableColumn,
+  TableRow,
+} from "../../../../common/ui/table/components/table/table.component";
 import { BehaviorSubject, combineLatest, startWith, Subject, switchMap, takeUntil } from "rxjs";
 import { MatPaginator } from "@angular/material/paginator";
 import { ActivatedRoute } from "@angular/router";
-import { EmojiStatusEnum, LocalStorageKeyEnum } from "src/app/models/data";
+import { EmojiStatusEnum, EMOJI_STATUS_PARAM, LocalStorageKeyEnum } from "src/app/pages/emojis-page/models/emojis";
 
 // Состояние страницы
 interface IEmojiPageState {
@@ -28,9 +33,9 @@ export class EmojisComponent implements OnInit, AfterViewInit {
   // Для навигации по страницам в качестве адресов (а точнее параметров) используется EmojiStatusEnum
   // Так как в зависимоти от адреса, мы будем получать эмоджи с определенными статусами,
   readonly links: Array<IMenuLink> = [
-    { label: "Все", link: `/${EmojiStatusEnum.GENERAL}` },
-    { label: "Избранное", link: `/${EmojiStatusEnum.FAVORITE}` },
-    { label: "Удаленное", link: `/${EmojiStatusEnum.REMOVED}` },
+    { label: "Все", link: `../${EmojiStatusEnum.GENERAL}` },
+    { label: "Избранное", link: `../${EmojiStatusEnum.FAVORITE}` },
+    { label: "Удаленное", link: `../${EmojiStatusEnum.REMOVED}` },
   ];
 
   readonly emojiColumns: Array<TableColumn> = [
@@ -106,7 +111,7 @@ export class EmojisComponent implements OnInit, AfterViewInit {
         // так как мы подпишемся заново
         this.destroyPaginatorAndReloadSubscribe$.next();
 
-        this.currentPageStatus = params["status"] as EmojiStatusEnum;
+        this.currentPageStatus = params[EMOJI_STATUS_PARAM] as EmojiStatusEnum;
         this.paginator.pageIndex = this.pages[this.currentPageStatus].pageIndex;
         this.paginator.pageSize = this.pages[this.currentPageStatus].pageSize;
 
