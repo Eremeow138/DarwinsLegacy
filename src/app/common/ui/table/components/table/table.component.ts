@@ -6,12 +6,14 @@ export type TableColumnType = "text" | "link" | "image" | "actions";
 export type TableColumn = {
   // Служебное название колонки, по которому значение будет доставаться из строки.
   name: string;
-
   // Подпись к колонке, которая отобразится в интерфейсе.
   label: string;
-
   // Тип колонки.
   type: TableColumnType;
+  // Стили для каждой ячейки колонки
+  ngCellStyles?: NgStyle;
+  // Стили для каждой ячейки заголовка столбца
+  ngHeaderCellStyles?: NgStyle;
 };
 
 export type TableCellValue = string | null;

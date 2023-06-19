@@ -58,21 +58,26 @@ export class EmojisComponent implements OnInit, AfterViewInit {
       name: "name",
       label: "Имя",
       type: "text",
+      ngCellStyles: { width: "20%" },
     },
     {
       name: "link",
       label: "Ссылка",
       type: "link",
+      ngCellStyles: { width: "50%" },
     },
     {
       name: "preview",
       label: "Превью",
       type: "image",
+      ngCellStyles: { width: "15%" },
     },
     {
       name: "actionsList",
       label: "Действия",
       type: "actions",
+      ngCellStyles: { width: "15%" },
+      ngHeaderCellStyles: { width: "15%", paddingLeft: "30px" },
     },
   ];
 
