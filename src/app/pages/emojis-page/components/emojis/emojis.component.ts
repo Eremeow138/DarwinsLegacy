@@ -3,6 +3,7 @@ import { DataService } from "src/app/services/data/data.service";
 import { IMenuLink } from "../../../../common/ui/menu/components/menu/menu.component";
 import {
   ITableAction,
+  NgStyle,
   TableCellAction,
   TableColumn,
   TableRow,
@@ -183,7 +184,7 @@ export class EmojisComponent implements OnInit, AfterViewInit {
                 return {
                   name: { value: emoji.name },
                   link: { value: emoji.imageUrl },
-                  preview: { value: emoji.imageUrl },
+                  preview: { value: emoji.imageUrl, cellContentNgStyle: this.getStylesByEmojiStatus(emoji.status) },
                   actionsList: { actionsList: this.getActionListByEmojiStatusAndPageParam(emoji.status) },
                 };
               });
@@ -196,6 +197,17 @@ export class EmojisComponent implements OnInit, AfterViewInit {
           });
       });
     }, 0);
+  }
+
+  /**
+   * Получить объекты стилей исходя из статуса эмоджи
+   * @param status - статус эмоджи
+   */
+  private getStylesByEmojiStatus(emojiStatus: EmojiStatusEnum): NgStyle | undefined {
+    if (emojiStatus === EmojiStatusEnum.FAVORITE) {
+      return { filter: "brightness(110%)" };
+    }
+    return;
   }
 
   /**

@@ -24,11 +24,15 @@ export type TableCellAction = {
   color?: "basic" | "primary" | "accent" | "warn" | "disabled" | "link";
 };
 
+export type NgStyle = Record<string, string | number>;
+
 export type TableRowCell = {
   // текущее значение ячейки
   value?: TableCellValue;
   // Список действий для ячейки с типом "actions".
   actionsList?: Array<TableCellAction>;
+  // Стили для директивы ngStyle. Применяются к ребенку ячейки.
+  cellContentNgStyle?: NgStyle;
 };
 
 export type TableRow = {
@@ -85,6 +89,11 @@ export class TableComponent implements OnInit {
   getCellActions(row: TableRow, column: TableColumn): Array<TableCellAction> {
     const actions = row[column.name].actionsList;
     return actions ? actions : [];
+  }
+
+  getCellContentStyles(row: TableRow, column: TableColumn): NgStyle | null {
+    const styles = row[column.name].cellContentNgStyle;
+    return styles ? styles : null;
   }
 
   emitAction(column: TableColumn, row: TableRow, action: string): void {

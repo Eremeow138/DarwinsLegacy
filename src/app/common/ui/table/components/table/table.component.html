@@ -2,28 +2,35 @@
   <ng-container *ngFor="let column of columns; let i = index" [matColumnDef]="column.name">
     <th mat-header-cell *matHeaderCellDef>{{ column.label }}</th>
     <td mat-cell *matCellDef="let row">
-      <ng-container *ngIf="column.type === 'text'">{{ getTextCellValue(row, column) }}</ng-container>
-      <ng-container *ngIf="column.type === 'link'"
-        ><a [href]="getTextCellValue(row, column)">{{ getTextCellValue(row, column) }}</a></ng-container
+      <span *ngIf="column.type === 'text'" [ngStyle]="getCellContentStyles(row, column)">{{
+        getTextCellValue(row, column)
+      }}</span>
+      <a
+        *ngIf="column.type === 'link'"
+        [href]="getTextCellValue(row, column)"
+        [ngStyle]="getCellContentStyles(row, column)"
+        >{{ getTextCellValue(row, column) }}</a
       >
-      <ng-container *ngIf="column.type === 'image'"
-        ><img
-          appTooltip
-          [position]="TooltipPosition.LEFT"
-          [tooltipImage]="getTextCellValue(row, column)"
-          class="preview"
-          [src]="getTextCellValue(row, column)"
-          alt="error"
-      /></ng-container>
+      <img
+        *ngIf="column.type === 'image'"
+        appTooltip
+        [position]="TooltipPosition.LEFT"
+        [tooltipImage]="getTextCellValue(row, column)"
+        class="preview"
+        [src]="getTextCellValue(row, column)"
+        [ngStyle]="getCellContentStyles(row, column)"
+        alt="error"
+      />
       <ng-container *ngIf="column.type === 'actions'"
         ><button
           mat-icon-button
+          *ngFor="let action of getCellActions(row, column)"
           appTooltip
           [position]="TooltipPosition.BELOW"
           [tooltipText]="action.tooltip"
           [color]="action.color ?? 'basic'"
-          *ngFor="let action of getCellActions(row, column)"
           (click)="emitAction(column, row, action.action)"
+          [ngStyle]="getCellContentStyles(row, column)"
         >
           <mat-icon>{{ action.iconName }}</mat-icon>
         </button>
