@@ -14,6 +14,11 @@ export interface IPageData<T> {
 export class DataService {
   constructor(private http: HttpClient) {}
 
+  /**
+   * Изменить статус эмоджи
+   * @param emojiName - имя эмоджи
+   * @param status - новый статус
+   */
   changeEmojiStatus(emojiName: string, status: EmojiStatusEnum): Observable<string> {
     const emojis = this.getEmojisFromLocalStorage();
     const updatedEmojis = emojis?.map((emoji) => (emoji.name === emojiName ? { ...emoji, status: status } : emoji));
@@ -21,37 +26,32 @@ export class DataService {
     return of("success");
   }
 
-  getEmojisFromLocalStorage(): Array<IEmoji> | undefined {
-    const allEmojisFromLocalStorageString = localStorage.getItem(LocalStorageKeyEnum.ALL_EMOJIS);
-
-    if (allEmojisFromLocalStorageString) {
-      return JSON.parse(allEmojisFromLocalStorageString) as Array<IEmoji>;
-    }
-    return undefined;
-  }
-  // todo сделать рефактор метода
-  getEmojis(
+  /**
+   * Получить эмоджи для страницы.
+   * Метод пытается получить эмоджи из локального хранилища.
+   * Если локальное хранилище пустое - идем за эмоджами в гитхаб и записываем в свое локальное хранилище.
+   * @param countPerPage - количество эмоджи на странице
+   * @param pageNumber - текущий номер страницы
+   * @param pageName - адрес страницы (идентичен статусу эмоджи)
+   * @param searchText - текст поиска
+   */
+  getEmojisDataForPage(
     countPerPage: number,
     pageNumber = 1,
-    status = EmojiStatusEnum.GENERAL,
+    pageName = EmojiStatusEnum.GENERAL,
     searchText: string | null = null
   ): Observable<IPageData<IEmoji>> {
-    const allEmojisFromLocalStorage = this.getEmojisFromLocalStorage();
-    if (allEmojisFromLocalStorage) {
-      const filteredByStatusEmojis = this.filterEmojiByStatus(allEmojisFromLocalStorage, status);
-      const filteredBySearchTextEmojis = searchText
-        ? filteredByStatusEmojis.filter((emoji) => emoji.name.toLowerCase().includes(searchText))
-        : filteredByStatusEmojis;
-      return of({
-        items: filteredBySearchTextEmojis.slice(countPerPage * pageNumber - countPerPage, countPerPage * pageNumber),
-        count: filteredBySearchTextEmojis.length,
-      });
+    const emojisFromLocalStorage = this.getEmojisFromLocalStorage();
+    // Если эмоджи есть в локал сторейдж, возвращаем их
+    if (emojisFromLocalStorage) {
+      const pageData = this.filterAndCutEmojis(emojisFromLocalStorage, countPerPage, pageNumber, pageName, searchText);
+      return of(pageData);
     }
-
+    // Иначе, идем за ними на гитхаб
     return this.http
       .get<Record<string, string>>("https://api.github.com/emojis", {
         // токен взят с неиспользуемого гитхаб аккаунта
-        headers: new HttpHeaders({ Authorization: "Bearer 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" }),
+        headers: new HttpHeaders({ Authorization: "Bearer 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" }),
       })
       .pipe(
         map((emojis) => {
@@ -60,27 +60,65 @@ export class DataService {
           );
         }),
         tap((emojis) => {
+          // Попутно запишем эмоджи в локал сторедж
           localStorage.setItem(LocalStorageKeyEnum.ALL_EMOJIS, JSON.stringify(emojis));
         }),
         map((emojis) => {
-          const filteredByStatusEmojis = this.filterEmojiByStatus(emojis, status);
-          const filteredBySearchTextEmojis = searchText
-            ? filteredByStatusEmojis.filter((emoji) => emoji.name.toLowerCase().includes(searchText))
-            : filteredByStatusEmojis;
-          return {
-            items: filteredBySearchTextEmojis.slice(
-              countPerPage * pageNumber - countPerPage,
-              countPerPage * pageNumber
-            ),
-            count: filteredBySearchTextEmojis.length,
-          };
+          const pageData = this.filterAndCutEmojis(emojis, countPerPage, pageNumber, pageName, searchText);
+          return pageData;
         })
       );
   }
 
-  private filterEmojiByStatus(emojis: Array<IEmoji>, status = EmojiStatusEnum.GENERAL): Array<IEmoji> {
+  /**
+   * Получить эмоджи из локал сторейджа
+   */
+  private getEmojisFromLocalStorage(): Array<IEmoji> | undefined {
+    const allEmojisFromLocalStorageString = localStorage.getItem(LocalStorageKeyEnum.ALL_EMOJIS);
+
+    if (allEmojisFromLocalStorageString) {
+      return JSON.parse(allEmojisFromLocalStorageString) as Array<IEmoji>;
+    }
+    return undefined;
+  }
+
+  /**
+   * Фильтруем и обрезаем список эмоджи
+   * @param countPerPage - количество эмоджи на странице
+   * @param pageNumber - текущий номер страницы
+   * @param pageName - адрес страницы (идентичен статусу эмоджи)
+   * @param searchText - текст поиска
+   */
+  private filterAndCutEmojis(
+    emojis: Array<IEmoji>,
+    countPerPage: number,
+    pageNumber: number,
+    pageName: EmojiStatusEnum,
+    searchText: string | null
+  ): IPageData<IEmoji> {
+    const filteredByPageNameEmojis = this.filterEmojiByPageName(emojis, pageName);
+
+    const filteredBySearchTextEmojis = searchText
+      ? filteredByPageNameEmojis.filter((emoji) => emoji.name.toLowerCase().includes(searchText))
+      : filteredByPageNameEmojis;
+
+    const cutEmojis = filteredBySearchTextEmojis.slice(
+      countPerPage * pageNumber - countPerPage,
+      countPerPage * pageNumber
+    );
+
+    return { items: cutEmojis, count: filteredBySearchTextEmojis.length };
+  }
+
+  /**
+   * Фильтруем и обрезаем список эмоджи.
+   * Для каждой страницы свой набор эмоджи.
+   * @param emojis - количество эмоджи на странице
+   * @param pageName - адрес страницы (идентичен статусу эмоджи)
+   */
+  private filterEmojiByPageName(emojis: Array<IEmoji>, pageName = EmojiStatusEnum.GENERAL): Array<IEmoji> {
     return emojis.filter((emoji) => {
-      switch (status) {
+      switch (pageName) {
         case EmojiStatusEnum.GENERAL:
           return emoji.status === EmojiStatusEnum.GENERAL || emoji.status === EmojiStatusEnum.FAVORITE;
         case EmojiStatusEnum.FAVORITE:

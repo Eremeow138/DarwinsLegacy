@@ -174,7 +174,7 @@ export class EmojisComponent implements OnInit, AfterViewInit {
 
               localStorage.setItem(LocalStorageKeyEnum.EMOJIS_PAGE_STATE, JSON.stringify(this.pages));
 
-              return this.dataService.getEmojis(
+              return this.dataService.getEmojisDataForPage(
                 pageData.pageSize,
                 pageData.pageIndex + 1,
                 this.currentPageStatus,
