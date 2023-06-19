@@ -7,7 +7,16 @@ import {
   TableColumn,
   TableRow,
 } from "../../../../common/ui/table/components/table/table.component";
-import { BehaviorSubject, combineLatest, startWith, Subject, switchMap, takeUntil } from "rxjs";
+import {
+  BehaviorSubject,
+  combineLatest,
+  debounceTime,
+  distinctUntilChanged,
+  startWith,
+  Subject,
+  switchMap,
+  takeUntil,
+} from "rxjs";
 import { MatPaginator } from "@angular/material/paginator";
 import { ActivatedRoute } from "@angular/router";
 import { EmojiStatusEnum, EMOJI_STATUS_PARAM, LocalStorageKeyEnum } from "src/app/pages/emojis-page/models/emojis";
@@ -99,8 +108,8 @@ export class EmojisComponent implements OnInit, AfterViewInit {
   // Сабджект для получения новых данных
   private reload$ = new BehaviorSubject<null>(null);
 
-  // Сабджект для отписки от измениния пагинатора и сабджекта reload$
-  private unsubscribePaginatorAndReloadSubscribes$ = new Subject<void>();
+  // Сабджект для отписки после изменения параметра страницы
+  private unsubscribeAfterParamChanged$ = new Subject<void>();
 
   constructor(private dataService: DataService, private activatedRoute: ActivatedRoute) {}
 
@@ -118,7 +127,7 @@ export class EmojisComponent implements OnInit, AfterViewInit {
     setTimeout(() => {
       this.activatedRoute.params.subscribe((params) => {
         // При каждом изменении параметра роута, уничтожаем подписку на paginator и reload$
-        this.unsubscribePaginatorAndReloadSubscribes$.next();
+        this.unsubscribeAfterParamChanged$.next();
 
         // Записываем текущий статус страницы из параметра роута
         this.currentPageStatus = params[EMOJI_STATUS_PARAM] as EmojiStatusEnum;
@@ -129,14 +138,16 @@ export class EmojisComponent implements OnInit, AfterViewInit {
         this.searchControl.patchValue(this.pages[this.currentPageStatus].searchText);
 
         // При изменении строки поиска, устанавливаем пагинатору первую страницу
-        this.searchControl.valueChanges.pipe(takeUntil(this.unsubscribePaginatorAndReloadSubscribes$)).subscribe(() => {
-          if (this.paginator.hasPreviousPage()) {
-            this.paginator.firstPage();
-          } else {
-            // Если мы уже на первой странице, запрашиваем новые данные
-            this.reload$.next(null);
-          }
-        });
+        this.searchControl.valueChanges
+          .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.unsubscribeAfterParamChanged$))
+          .subscribe(() => {
+            if (this.paginator.hasPreviousPage()) {
+              this.paginator.firstPage();
+            } else {
+              // Если мы уже на первой странице, запрашиваем новые данные
+              this.reload$.next(null);
+            }
+          });
 
         combineLatest([
           this.paginator.page.asObservable().pipe(
@@ -164,7 +175,7 @@ export class EmojisComponent implements OnInit, AfterViewInit {
                 this.searchControl.value
               );
             }),
-            takeUntil(this.unsubscribePaginatorAndReloadSubscribes$)
+            takeUntil(this.unsubscribeAfterParamChanged$)
           )
           .subscribe({
             next: (emojis) => {
