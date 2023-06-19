@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output, TrackByFunction } from "@angular/core";
+import { TooltipPosition } from "../../../tooltip/directives/tooltip.directive";
 
 export type TableColumnType = "text" | "link" | "image" | "actions";
 
@@ -69,6 +70,8 @@ export class TableComponent implements OnInit {
 
   // Массив с именами колонок для удобного использования из разметки.
   columnsNames: Array<string> = [];
+
+  readonly TooltipPosition = TooltipPosition;
 
   ngOnInit(): void {
     this.columnsNames = this.columns.map((column: TableColumn): string => column.name);

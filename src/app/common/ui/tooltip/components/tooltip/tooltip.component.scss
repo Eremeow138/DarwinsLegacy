@@ -1,0 +1,54 @@
+.tooltip {
+  --tooltip-border-radius: 4px;
+  --tooltip-margin: 10px;
+
+  width: max-content;
+  max-width: 400px;
+  min-width: 74px;
+  position: absolute;
+  border-radius: var(--tooltip-border-radius);
+  opacity: 0;
+  box-sizing: border-box;
+  // выше модальных окон материала
+  z-index: 1001;
+
+  .content-wrapper {
+    display: flex;
+    justify-content: center;
+    color: white;
+    font-weight: 400;
+    letter-spacing: 0.03333em;
+    font-size: 12px;
+    background-color: #616161;
+    border-radius: var(--tooltip-border-radius);
+    padding: 8px;
+
+    .text-wrapper {
+      .title {
+        font-weight: 600;
+      }
+    }
+  }
+
+  &.visible {
+    opacity: 1;
+    transition: opacity 300ms;
+  }
+
+  &.above {
+    transform: translate(-50%, -100%);
+    transform: translate(-50%, calc(-100% - var(--tooltip-margin)));
+  }
+
+  &.below {
+    transform: translate(-50%, var(--tooltip-margin));
+  }
+
+  &.left {
+    transform: translate(calc(-100% - var(--tooltip-margin)), -50%);
+  }
+
+  &.right {
+    transform: translate(var(--tooltip-margin), -50%);
+  }
+}

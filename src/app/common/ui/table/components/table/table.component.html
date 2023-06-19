@@ -7,13 +7,20 @@
         ><a [href]="getTextCellValue(row, column)">{{ getTextCellValue(row, column) }}</a></ng-container
       >
       <ng-container *ngIf="column.type === 'image'"
-        ><img class="preview" [src]="getTextCellValue(row, column)" alt="error"
+        ><img
+          appTooltip
+          [position]="TooltipPosition.LEFT"
+          [tooltipImage]="getTextCellValue(row, column)"
+          class="preview"
+          [src]="getTextCellValue(row, column)"
+          alt="error"
       /></ng-container>
       <ng-container *ngIf="column.type === 'actions'"
         ><button
           mat-icon-button
-          [matTooltip]="action.tooltip"
-          matTooltipShowDelay="1000"
+          appTooltip
+          [position]="TooltipPosition.BELOW"
+          [tooltipText]="action.tooltip"
           [color]="action.color ?? 'basic'"
           *ngFor="let action of getCellActions(row, column)"
           (click)="emitAction(column, row, action.action)"
