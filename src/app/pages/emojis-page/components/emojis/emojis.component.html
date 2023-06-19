@@ -1,16 +1,29 @@
 <div class="emojis">
-  <div class="menu-wrapper">
-    <app-menu [menuLinks]="links"></app-menu>
-  </div>
-  <div class="table-wrapper">
-    <div class="table">
-      <app-table
-        [columns]="emojiColumns"
-        [rows]="emojiRows"
-        [trackByFn]="emojisTrackBy"
-        (actionEvent)="resolveAction($event)"
-      ></app-table>
+  <div class="header">
+    <h2 class="title">{{ getPageNameByStatus() }}</h2>
+    <div class="search-wrapper">
+      <app-field
+        [control]="searchControl"
+        [isClearable]="true"
+        placeholder="Поик по названию эмоджи"
+        prefixIconName="search"
+      ></app-field>
     </div>
-    <mat-paginator [pageSizeOptions]="pageSizeOptions" [length]="countOfEmojis" [pageSize]="pageSize"></mat-paginator>
+  </div>
+  <div class="main">
+    <div class="menu-wrapper">
+      <app-menu [menuLinks]="links"></app-menu>
+    </div>
+    <div class="content-wrapper">
+      <div class="table">
+        <app-table
+          [columns]="emojiColumns"
+          [rows]="emojiRows"
+          [trackByFn]="emojisTrackBy"
+          (actionEvent)="resolveAction($event)"
+        ></app-table>
+      </div>
+      <mat-paginator [pageSizeOptions]="pageSizeOptions" [length]="countOfEmojis" [pageSize]="pageSize"></mat-paginator>
+    </div>
   </div>
 </div>

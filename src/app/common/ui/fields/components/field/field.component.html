@@ -1,0 +1,15 @@
+<div class="field">
+  <mat-form-field>
+    <input matInput type="text" [placeholder]="placeholder" [formControl]="control" />
+    <button
+      *ngIf="isClearable && control.value"
+      matSuffix
+      mat-icon-button
+      aria-label="Очистить"
+      (click)="control.patchValue('')"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+    <mat-icon *ngIf="prefixIconName" matPrefix>{{ prefixIconName }}</mat-icon>
+  </mat-form-field>
+</div>

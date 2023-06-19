@@ -11,6 +11,7 @@ import { BehaviorSubject, combineLatest, startWith, Subject, switchMap, takeUnti
 import { MatPaginator } from "@angular/material/paginator";
 import { ActivatedRoute } from "@angular/router";
 import { EmojiStatusEnum, EMOJI_STATUS_PARAM, LocalStorageKeyEnum } from "src/app/pages/emojis-page/models/emojis";
+import { FormControl } from "@angular/forms";
 
 // Состояние страницы
 interface IEmojiPageState {
@@ -18,6 +19,8 @@ interface IEmojiPageState {
   pageSize: number;
   // Индекс страницы
   pageIndex: number;
+  // Поисковая строка
+  searchText: string | null;
 }
 
 type EmojiPages = Record<EmojiStatusEnum, IEmojiPageState>;
@@ -29,6 +32,8 @@ type EmojiPages = Record<EmojiStatusEnum, IEmojiPageState>;
 })
 export class EmojisComponent implements OnInit, AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+  searchControl = new FormControl("");
 
   // Для навигации по страницам в качестве адресов (а точнее параметров) используется EmojiStatusEnum
   // Так как в зависимоти от адреса, мы будем получать эмоджи с определенными статусами,
@@ -69,14 +74,17 @@ export class EmojisComponent implements OnInit, AfterViewInit {
     general: {
       pageSize: this.pageSizeOptions[1],
       pageIndex: 0,
+      searchText: "",
     },
     favorite: {
       pageSize: this.pageSizeOptions[1],
       pageIndex: 0,
+      searchText: "",
     },
     removed: {
       pageSize: this.pageSizeOptions[1],
       pageIndex: 0,
+      searchText: "",
     },
   };
 
@@ -88,9 +96,11 @@ export class EmojisComponent implements OnInit, AfterViewInit {
 
   emojisTrackBy: TrackByFunction<TableRow> = (index: number, row: TableRow) => row["name"].value;
 
+  // Сабджект для получения новых данных
   private reload$ = new BehaviorSubject<null>(null);
 
-  private destroyPaginatorAndReloadSubscribe$ = new Subject<void>();
+  // Сабджект для отписки от измениния пагинатора и сабджекта reload$
+  private unsubscribePaginatorAndReloadSubscribes$ = new Subject<void>();
 
   constructor(private dataService: DataService, private activatedRoute: ActivatedRoute) {}
 
@@ -107,13 +117,26 @@ export class EmojisComponent implements OnInit, AfterViewInit {
     // todo объяснить зачем тут сет таймаут
     setTimeout(() => {
       this.activatedRoute.params.subscribe((params) => {
-        // При каждом изменении параметра, уничтожаем подписку на paginator и reload$
-        // так как мы подпишемся заново
-        this.destroyPaginatorAndReloadSubscribe$.next();
+        // При каждом изменении параметра роута, уничтожаем подписку на paginator и reload$
+        this.unsubscribePaginatorAndReloadSubscribes$.next();
 
+        // Записываем текущий статус страницы из параметра роута
         this.currentPageStatus = params[EMOJI_STATUS_PARAM] as EmojiStatusEnum;
+        // Устанавливаем пагинатору индекс и размер страницы
         this.paginator.pageIndex = this.pages[this.currentPageStatus].pageIndex;
         this.paginator.pageSize = this.pages[this.currentPageStatus].pageSize;
+        // В строку поиска записываем текст для поиска
+        this.searchControl.patchValue(this.pages[this.currentPageStatus].searchText);
+
+        // При изменении строки поиска, устанавливаем пагинатору первую страницу
+        this.searchControl.valueChanges.pipe(takeUntil(this.unsubscribePaginatorAndReloadSubscribes$)).subscribe(() => {
+          if (this.paginator.hasPreviousPage()) {
+            this.paginator.firstPage();
+          } else {
+            // Если мы уже на первой странице, запрашиваем новые данные
+            this.reload$.next(null);
+          }
+        });
 
         combineLatest([
           this.paginator.page.asObservable().pipe(
@@ -125,17 +148,23 @@ export class EmojisComponent implements OnInit, AfterViewInit {
           this.reload$,
         ])
           .pipe(
-            takeUntil(this.destroyPaginatorAndReloadSubscribe$),
             switchMap(([pageData]) => {
               this.pages[this.currentPageStatus].pageIndex = pageData.pageIndex;
               this.pages[this.currentPageStatus].pageSize = pageData.pageSize;
+              this.pages[this.currentPageStatus].searchText = this.searchControl.value;
 
               this.pageSize = pageData.pageSize;
 
               localStorage.setItem(LocalStorageKeyEnum.EMOJIS_PAGE_STATE, JSON.stringify(this.pages));
 
-              return this.dataService.getEmojis(pageData.pageSize, pageData.pageIndex + 1, this.currentPageStatus);
-            })
+              return this.dataService.getEmojis(
+                pageData.pageSize,
+                pageData.pageIndex + 1,
+                this.currentPageStatus,
+                this.searchControl.value
+              );
+            }),
+            takeUntil(this.unsubscribePaginatorAndReloadSubscribes$)
           )
           .subscribe({
             next: (emojis) => {
@@ -230,5 +259,9 @@ export class EmojisComponent implements OnInit, AfterViewInit {
         this.reload$.next(null);
       });
     }
+  }
+
+  getPageNameByStatus(): string {
+    return this.links.find((menuLink) => menuLink.link.includes(this.currentPageStatus))?.label ?? "";
   }
 }

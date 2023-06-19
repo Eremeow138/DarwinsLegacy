@@ -29,14 +29,22 @@ export class DataService {
     }
     return undefined;
   }
-
-  getEmojis(countPerPage: number, pageNumber = 1, status = EmojiStatusEnum.GENERAL): Observable<IPageData<IEmoji>> {
+  // todo сделать рефактор метода
+  getEmojis(
+    countPerPage: number,
+    pageNumber = 1,
+    status = EmojiStatusEnum.GENERAL,
+    searchText: string | null = null
+  ): Observable<IPageData<IEmoji>> {
     const allEmojisFromLocalStorage = this.getEmojisFromLocalStorage();
     if (allEmojisFromLocalStorage) {
-      const filteredeEmojis = this.filterEmojiByStatus(allEmojisFromLocalStorage, status);
+      const filteredByStatusEmojis = this.filterEmojiByStatus(allEmojisFromLocalStorage, status);
+      const filteredBySearchTextEmojis = searchText
+        ? filteredByStatusEmojis.filter((emoji) => emoji.name.toLowerCase().includes(searchText))
+        : filteredByStatusEmojis;
       return of({
-        items: filteredeEmojis.slice(countPerPage * pageNumber - countPerPage, countPerPage * pageNumber),
-        count: filteredeEmojis.length,
+        items: filteredBySearchTextEmojis.slice(countPerPage * pageNumber - countPerPage, countPerPage * pageNumber),
+        count: filteredBySearchTextEmojis.length,
       });
     }
 
@@ -55,10 +63,16 @@ export class DataService {
           localStorage.setItem(LocalStorageKeyEnum.ALL_EMOJIS, JSON.stringify(emojis));
         }),
         map((emojis) => {
-          const filteredeEmojis = this.filterEmojiByStatus(emojis, status);
+          const filteredByStatusEmojis = this.filterEmojiByStatus(emojis, status);
+          const filteredBySearchTextEmojis = searchText
+            ? filteredByStatusEmojis.filter((emoji) => emoji.name.toLowerCase().includes(searchText))
+            : filteredByStatusEmojis;
           return {
-            items: filteredeEmojis.slice(countPerPage * pageNumber - countPerPage, countPerPage * pageNumber),
-            count: filteredeEmojis.length,
+            items: filteredBySearchTextEmojis.slice(
+              countPerPage * pageNumber - countPerPage,
+              countPerPage * pageNumber
+            ),
+            count: filteredBySearchTextEmojis.length,
           };
         })
       );

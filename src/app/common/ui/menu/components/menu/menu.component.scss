@@ -1,4 +1,8 @@
 .menu {
+  &.mdc-list {
+    padding: 0;
+  }
+
   .menu-item {
     &.selected {
       background: rgba(63, 81, 181, 0.15);
