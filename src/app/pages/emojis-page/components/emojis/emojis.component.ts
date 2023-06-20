@@ -30,6 +30,7 @@ import { MatPaginator } from "@angular/material/paginator";
 import { ActivatedRoute } from "@angular/router";
 import { EmojiStatusEnum, EMOJI_STATUS_PARAM, LocalStorageKeyEnum } from "src/app/pages/emojis-page/models/emojis";
 import { FormControl } from "@angular/forms";
+import { UntilDestroy, untilDestroyed } from "@ngneat/until-destroy";
 
 // Состояние страницы
 interface IEmojiPageState {
@@ -43,6 +44,7 @@ interface IEmojiPageState {
 
 type EmojiPages = Record<EmojiStatusEnum, IEmojiPageState>;
 
+@UntilDestroy()
 @Component({
   selector: "app-emojis",
   templateUrl: "./emojis.component.html",
@@ -142,9 +144,9 @@ export class EmojisComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    // todo объяснить зачем тут сет таймаут
+    // Используем setTimeout, чтобы перенести изменение в следующий цикл обнаружения изменений, чтобы избежать ошибки "ExpressionChangedAfterItHasBeenCheckedError"
     setTimeout(() => {
-      this.activatedRoute.params.subscribe((params) => {
+      this.activatedRoute.params.pipe(untilDestroyed(this)).subscribe((params) => {
         // При каждом изменении параметра роута, уничтожаем подписку на paginator и reload$
         this.unsubscribeAfterParamChanged$.next();
 
@@ -158,7 +160,12 @@ export class EmojisComponent implements OnInit, AfterViewInit {
 
         // При изменении строки поиска, устанавливаем пагинатору первую страницу
         this.searchControl.valueChanges
-          .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.unsubscribeAfterParamChanged$))
+          .pipe(
+            debounceTime(300),
+            distinctUntilChanged(),
+            takeUntil(this.unsubscribeAfterParamChanged$),
+            untilDestroyed(this)
+          )
           .subscribe(() => {
             if (this.paginator.hasPreviousPage()) {
               this.paginator.firstPage();
@@ -194,7 +201,8 @@ export class EmojisComponent implements OnInit, AfterViewInit {
                 this.searchControl.value
               );
             }),
-            takeUntil(this.unsubscribeAfterParamChanged$)
+            takeUntil(this.unsubscribeAfterParamChanged$),
+            untilDestroyed(this)
           )
           .subscribe({
             next: (emojis) => {
@@ -208,9 +216,8 @@ export class EmojisComponent implements OnInit, AfterViewInit {
               });
               this.countOfEmojis = emojis.count;
 
-              this.cdr.markForCheck();
+              this.cdr.detectChanges();
             },
-            //todo добавить обработчик ошибок
             error: (error) => {
               console.log(error);
             },
@@ -296,11 +303,13 @@ export class EmojisComponent implements OnInit, AfterViewInit {
 
   resolveAction(tableAction: ITableAction): void {
     const emojiName = tableAction.tableCell.row["name"].value;
-    // todo отписаться
     if (emojiName) {
-      this.dataService.changeEmojiStatus(emojiName, tableAction.action as EmojiStatusEnum).subscribe(() => {
-        this.reload$.next(null);
-      });
+      this.dataService
+        .changeEmojiStatus(emojiName, tableAction.action as EmojiStatusEnum)
+        .pipe(untilDestroyed(this))
+        .subscribe(() => {
+          this.reload$.next(null);
+        });
     }
   }
 
