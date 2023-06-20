@@ -45,7 +45,8 @@ interface IEmojiPageState {
 type EmojiPages = Record<EmojiStatusEnum, IEmojiPageState>;
 
 /**
- * Компонент страницы эмодзи
+ * Компонент страницы эмодзи.
+ * Компонент делает запросы к эмодзи каждый раз когда меняется параметр страницы.
  */
 
 @UntilDestroy()
@@ -139,10 +140,12 @@ export class EmojisComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit(): void {
+    // При инициализации компонента достаем из локального хранилища состояния страниц.
     const pagesStateFromLocalStorage = localStorage.getItem(LocalStorageKeyEnum.EMOJIS_PAGE_STATE);
     if (pagesStateFromLocalStorage) {
       this.pages = JSON.parse(pagesStateFromLocalStorage);
     } else {
+      // Если в локальном хранилище состояний страниц нет, записываем в хранилище начальные значения
       localStorage.setItem(LocalStorageKeyEnum.EMOJIS_PAGE_STATE, JSON.stringify(this.pages));
     }
   }
@@ -179,6 +182,7 @@ export class EmojisComponent implements OnInit, AfterViewInit {
             }
           });
 
+        // Подписываемся на последние изменения пагинатора и обзервабла перезагрузки
         combineLatest([
           this.paginator.page.asObservable().pipe(
             startWith({
@@ -220,7 +224,7 @@ export class EmojisComponent implements OnInit, AfterViewInit {
               });
               this.countOfEmojis = emojis.count;
 
-              this.cdr.detectChanges();
+              this.cdr.markForCheck();
             },
             error: (error) => {
               console.log(error);
