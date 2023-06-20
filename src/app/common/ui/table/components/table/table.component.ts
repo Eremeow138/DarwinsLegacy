@@ -1,4 +1,12 @@
-import { Component, EventEmitter, Input, OnInit, Output, TrackByFunction } from "@angular/core";
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+  TrackByFunction,
+} from "@angular/core";
 import { TooltipPosition } from "../../../tooltip/directives/tooltip.directive";
 
 export type TableColumnType = "text" | "link" | "image" | "actions";
@@ -55,6 +63,7 @@ export interface ITableAction {
   selector: "app-table[trackByFn]",
   templateUrl: "./table.component.html",
   styleUrls: ["./table.component.scss"],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TableComponent implements OnInit {
   // Пользовательские колонки.

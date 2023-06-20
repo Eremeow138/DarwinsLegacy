@@ -1,4 +1,12 @@
-import { AfterViewInit, Component, OnInit, TrackByFunction, ViewChild } from "@angular/core";
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  TrackByFunction,
+  ViewChild,
+} from "@angular/core";
 import { DataService } from "src/app/services/data/data.service";
 import { IMenuLink } from "../../../../common/ui/menu/components/menu/menu.component";
 import {
@@ -39,6 +47,7 @@ type EmojiPages = Record<EmojiStatusEnum, IEmojiPageState>;
   selector: "app-emojis",
   templateUrl: "./emojis.component.html",
   styleUrls: ["./emojis.component.scss"],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EmojisComponent implements OnInit, AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -117,7 +126,11 @@ export class EmojisComponent implements OnInit, AfterViewInit {
   // Сабджект для отписки после изменения параметра страницы
   private unsubscribeAfterParamChanged$ = new Subject<void>();
 
-  constructor(private dataService: DataService, private activatedRoute: ActivatedRoute) {}
+  constructor(
+    private dataService: DataService,
+    private activatedRoute: ActivatedRoute,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     const pagesStateFromLocalStorage = localStorage.getItem(LocalStorageKeyEnum.EMOJIS_PAGE_STATE);
@@ -194,6 +207,8 @@ export class EmojisComponent implements OnInit, AfterViewInit {
                 };
               });
               this.countOfEmojis = emojis.count;
+
+              this.cdr.markForCheck();
             },
             //todo добавить обработчик ошибок
             error: (error) => {

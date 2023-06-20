@@ -132,8 +132,8 @@ export class TooltipDirective implements OnChanges, OnDestroy {
 
   private showTooltip(): void {
     if (this.componentRef) {
-      this.componentRef.instance.visible = true;
-      this.componentRef.changeDetectorRef.detectChanges();
+      this.componentRef.setInput("visible", true);
+      this.componentRef.changeDetectorRef.markForCheck();
     }
   }
 
@@ -142,7 +142,6 @@ export class TooltipDirective implements OnChanges, OnDestroy {
       window.clearInterval(this.showTimeout);
       window.clearInterval(this.hideTimeout);
       this.appRef.detachView(this.componentRef.hostView);
-      this.componentRef.changeDetectorRef.detectChanges();
       this.componentRef.destroy();
       this.componentRef = null;
     }
