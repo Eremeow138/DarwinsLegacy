@@ -3,7 +3,7 @@ import { ActivatedRouteSnapshot, CanActivate, Router } from "@angular/router";
 import { EmojiStatusEnum, EMOJI_STATUS_PARAM } from "src/app/pages/emojis-page/models/emojis";
 
 /**
- * Гвард, проверяющий корректность указания параметра для страницы эмоджей.
+ * Гвард, проверяющий корректность указания параметра для страницы эмодзи.
  */
 @Injectable({
   providedIn: "root",

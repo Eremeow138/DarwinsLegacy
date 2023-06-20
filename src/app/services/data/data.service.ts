@@ -21,8 +21,8 @@ export class DataService {
   constructor(private http: HttpClient) {}
 
   /**
-   * Изменить статус эмоджи
-   * @param emojiName - имя эмоджи
+   * Изменить статус эмодзи
+   * @param emojiName - имя эмодзи
    * @param status - новый статус
    */
   changeEmojiStatus(emojiName: string, status: EmojiStatusEnum): Observable<string> {
@@ -33,12 +33,12 @@ export class DataService {
   }
 
   /**
-   * Получить эмоджи для страницы.
-   * Метод пытается получить эмоджи из локального хранилища.
-   * Если локальное хранилище пустое - идем за эмоджами в гитхаб и записываем в свое локальное хранилище.
-   * @param countPerPage - количество эмоджи на странице
+   * Получить эмодзи для страницы.
+   * Метод пытается получить эмодзи из локального хранилища.
+   * Если локальное хранилище пустое - идем за эмодзиами в гитхаб и записываем в свое локальное хранилище.
+   * @param countPerPage - количество эмодзи на странице
    * @param pageNumber - текущий номер страницы
-   * @param pageName - адрес страницы (идентичен статусу эмоджи)
+   * @param pageName - адрес страницы (идентичен статусу эмодзи)
    * @param searchText - текст поиска
    */
   getEmojisDataForPage(
@@ -48,7 +48,7 @@ export class DataService {
     searchText: string | null = null
   ): Observable<IPageData<IEmoji>> {
     const emojisFromLocalStorage = this.getEmojisFromLocalStorage();
-    // Если эмоджи есть в локал сторейдж, возвращаем их
+    // Если эмодзи есть в локал сторейдж, возвращаем их
     if (emojisFromLocalStorage) {
       const pageData = this.filterAndCutEmojis(emojisFromLocalStorage, countPerPage, pageNumber, pageName, searchText);
       return of(pageData);
@@ -67,7 +67,7 @@ export class DataService {
           );
         }),
         tap((emojis) => {
-          // Попутно запишем эмоджи в локал сторедж
+          // Попутно запишем эмодзи в локал сторедж
           localStorage.setItem(LocalStorageKeyEnum.ALL_EMOJIS, JSON.stringify(emojis));
         }),
         map((emojis) => {
@@ -78,7 +78,7 @@ export class DataService {
   }
 
   /**
-   * Получить эмоджи из локал сторейджа
+   * Получить эмодзи из локал сторейджа
    */
   private getEmojisFromLocalStorage(): Array<IEmoji> | undefined {
     const allEmojisFromLocalStorageString = localStorage.getItem(LocalStorageKeyEnum.ALL_EMOJIS);
@@ -90,10 +90,10 @@ export class DataService {
   }
 
   /**
-   * Фильтруем и обрезаем список эмоджи
-   * @param countPerPage - количество эмоджи на странице
+   * Фильтруем и обрезаем список эмодзи
+   * @param countPerPage - количество эмодзи на странице
    * @param pageNumber - текущий номер страницы
-   * @param pageName - адрес страницы (идентичен статусу эмоджи)
+   * @param pageName - адрес страницы (идентичен статусу эмодзи)
    * @param searchText - текст поиска
    */
   private filterAndCutEmojis(
@@ -118,10 +118,10 @@ export class DataService {
   }
 
   /**
-   * Фильтруем и обрезаем список эмоджи.
-   * Для каждой страницы свой набор эмоджи.
-   * @param emojis - количество эмоджи на странице
-   * @param pageName - адрес страницы (идентичен статусу эмоджи)
+   * Фильтруем и обрезаем список эмодзи.
+   * Для каждой страницы свой набор эмодзи.
+   * @param emojis - количество эмодзи на странице
+   * @param pageName - адрес страницы (идентичен статусу эмодзи)
    */
   private filterEmojiByPageName(emojis: Array<IEmoji>, pageName = EmojiStatusEnum.GENERAL): Array<IEmoji> {
     return emojis.filter((emoji) => {

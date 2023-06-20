@@ -44,6 +44,10 @@ interface IEmojiPageState {
 
 type EmojiPages = Record<EmojiStatusEnum, IEmojiPageState>;
 
+/**
+ * Компонент страницы эмодзи
+ */
+
 @UntilDestroy()
 @Component({
   selector: "app-emojis",
@@ -57,7 +61,7 @@ export class EmojisComponent implements OnInit, AfterViewInit {
   searchControl = new FormControl("");
 
   // Для навигации по страницам в качестве адресов (а точнее параметров) используется EmojiStatusEnum
-  // Так как в зависимоти от адреса, мы будем получать эмоджи с определенными статусами,
+  // Так как в зависимоти от адреса, мы будем получать эмодзи с определенными статусами,
   readonly links: Array<IMenuLink> = [
     { label: "Все", link: `../${EmojiStatusEnum.GENERAL}` },
     { label: "Избранное", link: `../${EmojiStatusEnum.FAVORITE}` },
@@ -227,8 +231,8 @@ export class EmojisComponent implements OnInit, AfterViewInit {
   }
 
   /**
-   * Получить объекты стилей исходя из статуса эмоджи
-   * @param status - статус эмоджи
+   * Получить объекты стилей исходя из статуса эмодзи
+   * @param status - статус эмодзи
    */
   private getStylesByEmojiStatus(emojiStatus: EmojiStatusEnum): NgStyle | undefined {
     if (emojiStatus === EmojiStatusEnum.FAVORITE) {
@@ -238,8 +242,8 @@ export class EmojisComponent implements OnInit, AfterViewInit {
   }
 
   /**
-   * Получить список действий исходя из статуса эмоджи и
-   * @param status - статус эмоджи
+   * Получить список действий исходя из статуса эмодзи и
+   * @param status - статус эмодзи
    */
   private getActionListByEmojiStatusAndPageParam(emojiStatus: EmojiStatusEnum): Array<TableCellAction> {
     const removeFromFavoriteAction: TableCellAction = {
@@ -251,8 +255,8 @@ export class EmojisComponent implements OnInit, AfterViewInit {
 
     switch (emojiStatus) {
       case EmojiStatusEnum.FAVORITE:
-        // В случае с избранным эмоджи, необходимо также проверить на какой странице мы находимся,
-        // так как страница "Все" может содержать избранные эмоджи
+        // В случае с избранным эмодзи, необходимо также проверить на какой странице мы находимся,
+        // так как страница "Все" может содержать избранные эмодзи
         switch (this.currentPageStatus) {
           // Для страницы "Избранное", возвращаем только действие "Удалить из избранного".
           case EmojiStatusEnum.FAVORITE:
