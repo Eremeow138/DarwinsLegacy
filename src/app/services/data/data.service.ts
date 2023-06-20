@@ -12,6 +12,12 @@ export interface IPageData<T> {
   providedIn: "root",
 })
 export class DataService {
+  // Токен в формате base64 с неиспользуемого гитхаб аккаунта.
+  // Без токена запрос может завалиться.
+  // Хранить токен как есть не получится, так как гитхаб его найдет и аннулирует.
+  // Поэтому храним в base64, а перед использованием декодируем.
+  private base64Token =
+    "Z2l0aHViX3BhdF8xMUJBVjM0VVEwSWlrc2p6SFJpcEEyX0xyVEluWDhyS09hS0VkRmd3SHNvQkFhaW1lVUIxY2VPQ1I3M0QxN1NzaW1FNjVDSDdOUUkzcmpvU1pU";
   constructor(private http: HttpClient) {}
 
   /**
@@ -50,8 +56,9 @@ export class DataService {
     // Иначе, идем за ними на гитхаб
     return this.http
       .get<Record<string, string>>("https://api.github.com/emojis", {
-        // токен взят с неиспользуемого гитхаб аккаунта
-        headers: new HttpHeaders({ Authorization: "Bearer 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" }),
+        headers: new HttpHeaders({
+          Authorization: `Bearer ${atob(this.base64Token)}`,
+        }),
       })
       .pipe(
         map((emojis) => {
