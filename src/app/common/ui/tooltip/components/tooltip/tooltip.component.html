@@ -1,0 +1,16 @@
+<div
+  class="tooltip"
+  [ngClass]="[position]"
+  [class.visible]="visible"
+  [style.left]="left + 'px'"
+  [style.top]="top + 'px'"
+  [style.max-width]="maxWidth"
+>
+  <div class="content-wrapper">
+    <div class="text-wrapper">
+      <div class="title">{{ title }}</div>
+      <img *ngIf="imgLink" [src]="imgLink" alt="image" />
+      <div class="text">{{ text }}</div>
+    </div>
+  </div>
+</div>

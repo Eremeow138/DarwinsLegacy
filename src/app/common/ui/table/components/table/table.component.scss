@@ -1,0 +1,17 @@
+.table {
+  width: 100%;
+  table-layout: fixed;
+
+  .table-cell {
+    white-space: nowrap;
+
+    .link {
+      color: #3f51b5;
+    }
+
+    .preview {
+      width: 25px;
+      height: 25px;
+    }
+  }
+}

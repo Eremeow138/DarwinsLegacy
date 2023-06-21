@@ -1,0 +1,10 @@
+<mat-nav-list class="menu">
+  <a
+    class="menu-item"
+    mat-list-item
+    *ngFor="let link of menuLinks"
+    routerLinkActive="selected"
+    [routerLink]="link.link"
+    >{{ link.label }}</a
+  >
+</mat-nav-list>

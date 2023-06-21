@@ -1,0 +1,52 @@
+<table class="table" mat-table [dataSource]="rows" [trackBy]="trackByFn">
+  <ng-container *ngFor="let column of columns; let i = index" [matColumnDef]="column.name">
+    <th
+      class="table-cell"
+      mat-header-cell
+      *matHeaderCellDef
+      [ngStyle]="column.ngHeaderCellStyles ?? column.ngCellStyles"
+    >
+      {{ column.label }}
+    </th>
+    <td class="table-cell" mat-cell *matCellDef="let row" [ngStyle]="column.ngCellStyles">
+      <span *ngIf="column.type === 'text'" [ngStyle]="getCellContentStyles(row, column)">{{
+        getTextCellValue(row, column)
+      }}</span>
+      <a
+        class="link"
+        *ngIf="column.type === 'link'"
+        [href]="getTextCellValue(row, column)"
+        target="_blank"
+        [ngStyle]="getCellContentStyles(row, column)"
+        >{{ getTextCellValue(row, column) }}</a
+      >
+      <img
+        class="preview"
+        *ngIf="column.type === 'image'"
+        appTooltip
+        [position]="TooltipPosition.LEFT"
+        [tooltipImage]="getTextCellValue(row, column)"
+        [src]="getTextCellValue(row, column)"
+        [ngStyle]="getCellContentStyles(row, column)"
+        alt="error"
+      />
+      <ng-container *ngIf="column.type === 'actions'"
+        ><button
+          mat-icon-button
+          *ngFor="let action of getCellActions(row, column)"
+          appTooltip
+          [position]="TooltipPosition.BELOW"
+          [tooltipText]="action.tooltip"
+          [color]="action.color ?? 'basic'"
+          (click)="emitAction(column, row, action.action)"
+          [ngStyle]="getCellContentStyles(row, column)"
+        >
+          <mat-icon>{{ action.iconName }}</mat-icon>
+        </button>
+      </ng-container>
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="columnsNames; sticky: isStickyHeader"></tr>
+  <tr mat-row *matRowDef="let row; columns: columnsNames"></tr>
+</table>

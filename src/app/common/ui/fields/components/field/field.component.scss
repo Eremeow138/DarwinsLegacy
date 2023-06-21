@@ -1,0 +1,53 @@
+.field {
+  width: 100%;
+
+  .mat-mdc-form-field {
+    width: 100%;
+    .mat-mdc-form-field-subscript-wrapper {
+      display: none;
+    }
+
+    .mdc-text-field {
+      border-radius: 4px;
+
+      &:not(.mdc-text-field--disabled) {
+        background-color: #fff;
+      }
+
+      &--outlined {
+        &:not(.mdc-text-field--disabled) {
+          .mdc-notched-outline {
+            &__leading,
+            &__notch,
+            &__trailing {
+              border-color: transparent;
+            }
+          }
+        }
+
+        &:not(.mdc-text-field--disabled).mdc-text-field--focused,
+        &:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) {
+          &:hover {
+            .mdc-notched-outline {
+              &__leading,
+              &__notch,
+              &__trailing {
+                border-color: #000;
+              }
+            }
+          }
+        }
+
+        &:not(.mdc-text-field--disabled).mdc-text-field--focused {
+          .mdc-notched-outline {
+            &__leading,
+            &__notch,
+            &__trailing {
+              border-color: #000;
+            }
+          }
+        }
+      }
+    }
+  }
+}
